@@ -1,31 +1,38 @@
+-- checking the highest numbers
+
 SELECT MAX(total_laid_off), MAX(percentage_laid_off)
 FROM layoffs_staging2;
 
+-- Companies with 100% layoffs
 SELECT *
 FROM layoffs_staging2
 WHERE percentage_laid_off = 1
 ORDER BY total_laid_off desc;
 
+-- date range 
 SELECT MIN(`date`), MAX(`date`)
 FROM layoffs_staging2;
 
+-- SUM of laid off per Industry
 SELECT industry, SUM(total_laid_off)
 FROM layoffs_staging2
 GROUP BY industry
 ORDER BY SUM(total_laid_off) DESC;
 
+-- SUM of laid off per Country
 SELECT country, SUM(total_laid_off)
 FROM layoffs_staging2
 GROUP BY country
 ORDER BY SUM(total_laid_off) DESC;
 
+ -- SUM of laid off per Year
 SELECT YEAR(`date`), SUM(total_laid_off)
 FROM layoffs_staging2
 GROUP BY YEAR(`date`)
 ORDER BY YEAR(`date`) DESC;
 
 
--- CREATE TABLE IN WHICH MONTH THE MOST PEOPLE GET FIRED
+-- CREATED TABLE IN WHICH MONTH THE MOST PEOPLE GET FIRED (2023 removed since it cover only 4 months)
 
 SELECT SUBSTRING(`date`,6,2) AS `MONTH`, SUM(total_laid_off) as total
 FROM layoffs_staging2
@@ -55,6 +62,7 @@ FROM layoffs_staging2
 GROUP BY company, YEAR(`date`)
 ORDER BY company ASC;
 
+-- Ranking of Companies which fired the most people in each Year
 
 WITH Company_Year (company, `year`, total_laid_off) AS
 (
@@ -67,6 +75,7 @@ FROM Company_Year
 WHERE `year` IS NOT NULL
 ORDER BY ranking;
 
+-- Ranking of Companies above but filtered by Year and made TOP 10
 WITH Company_Year (company, `year`, total_laid_off) AS
 (
 SELECT company, YEAR(`date`), SUM(total_laid_off)
@@ -82,7 +91,7 @@ SELECT *
 FROM Company_Year_Ranking
 WHERE ranking <=10;
 
--- Country - TOP  10 companies from each country which fired the most people in 4 years
+-- TOP 5 Companies from each Country which fired the most people in 4 years
 
 SELECT country, SUM(total_laid_off)
 FROM layoffs_staging2
@@ -108,8 +117,14 @@ WHERE ranking <=5
 
 -- TOP 5 industries with the most laid offs
 
-
-SELECT industry, SUM(total_laid_off), dense_rank() OVER(ORDER BY SUM(total_laid_off) DESC)
+WITH industry_ranking AS
+(
+SELECT industry, SUM(total_laid_off), dense_rank() OVER(ORDER BY SUM(total_laid_off) DESC) AS industry_rank
 FROM layoffs_staging2
-WHERE industry is not null
-GROUP BY industry;
+WHERE industry is not null 
+GROUP BY industry
+)
+SELECT *
+FROM industry_ranking
+WHERE industry_rank <=5
+;
