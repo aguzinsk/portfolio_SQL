@@ -33,7 +33,7 @@ SELECT *
 FROM duplicate_cte
 WHERE row_num >1;
 
--- Check if the company was truly a duplicated. Find out they were not so statement for finding duplicates have to be improved
+-- Check if the company was truly a duplicated. Find out they were not, so statement for finding duplicates have to be improved
 SELECT *
 FROM layoffs_staging
 WHERE company = 'Oda';
