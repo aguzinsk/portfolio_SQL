@@ -18,6 +18,7 @@ FROM layoffs;
 
 -- 2. Remove duplicats
 
+-- Any row with value greater than 1 is considered to be duplicate
 SELECT *,
 ROW_number() OVER(
 PARTITION BY company, industry, total_laid_off, percentage_laid_off, `date`) AS ROW_NUM
@@ -33,7 +34,8 @@ SELECT *
 FROM duplicate_cte
 WHERE row_num >1;
 
--- Check if the company was truly a duplicated. Find out they were not, so statement for finding duplicates have to be improved
+-- Checked if the company "Oda" was truly a duplicated. Find out it was not, 
+-- so statement has changed and i Include all the columns for looking duplicates
 SELECT *
 FROM layoffs_staging
 WHERE company = 'Oda';
@@ -56,7 +58,8 @@ SELECT *
 FROM layoffs_staging
 WHERE company = 'Casper';
 
--- I had to create new table to be able to delete duplicate rows
+-- The Casper company turned out to be a duplicate, so I continued with the duplicate removal process. 
+-- Creation of new table to delete duplicate rows
 
 CREATE TABLE `layoffs_staging2` (
   `company` text,
@@ -97,6 +100,7 @@ DROP COLUMN row_num;
 
 -- 3. Standardize the data
 
+-- triming values in rows
 SELECT  company, TRIM(company)
 FROM layoffs_staging2;
 
@@ -107,6 +111,7 @@ SELECT DISTINCT industry
 FROM layoffs_staging2
 ORDER BY industry;
 
+-- standardize names of industry in table
 SELECT *
 FROM layoffs_staging2
 WHERE industry LIKE 'Crypto%';
@@ -125,9 +130,10 @@ FROM layoffs_staging2
 ORDER BY 1;
 
 SELECT *
-FROm layoffs_staging2
+FROM layoffs_staging2
 WHERE country LIKE 'United States.';
 
+-- standardize countries names
 UPDATE layoffs_staging2
 SET country = 'United States'
 WHERE country LIKE 'United States%';
@@ -140,16 +146,18 @@ SELECT `date`,
 STR_TO_DATE(`date`, '%m/%d/%Y')
 from layoffs_staging2;
 
+-- standardize date
 UPDATE layoffs_staging2
 SET `date` = STR_TO_DATE(`date`, '%m/%d/%Y');
 
+-- changes date format pernamently in the table
 ALTER TABLE layoffs_staging2
 MODIFY COLUMN `date` DATE;
 
 SELECT *
 FROM layoffs_staging2;
 
--- 4. Null Values or blank
+-- 4. Null Values or blank 
 
 SELECT *
 FROM layoffs_staging2
@@ -177,7 +185,7 @@ AND EXISTS (SELECT 1
             WHERE t1.company = t2.company
             AND t1.location = t2.location
             AND t2.industry IS NOT NULL
-            AND t2.industry != '' -- Added when empty strings also mean "none"
+            AND t2.industry != '' -- Added if empty strings also mean "none"
            );
            
 UPDATE layoffs_staging2 t1
@@ -187,7 +195,7 @@ SET t1.industry = t2.industry
 WHERE (t1.industry IS NULL OR t1.industry ='')
 AND t2.industry IS NOT NULL;
 
--- blank values(?) were make problems so I change it into null
+-- layoffs_staging2 blank values(?) were make problems so I change it into null
 UPDATE layoffs_staging2
 SET industry = NULL
 WHERE industry = '';
@@ -201,7 +209,7 @@ FROM layoffs_staging2
 WHERE industry IS NULL
 OR industry = '';
 
--- 5. Remove Columns
+-- 5. Remove any Columns
 SELECT *
 FROM layoffs_staging2
 WHERE total_laid_off IS NULL
