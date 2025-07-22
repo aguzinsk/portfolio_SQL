@@ -201,7 +201,7 @@ FROM layoffs_staging2
 WHERE industry IS NULL
 OR industry = '';
 
--- 5. Remove any Columns
+-- 5. Remove Columns
 SELECT *
 FROM layoffs_staging2
 WHERE total_laid_off IS NULL
