@@ -13,7 +13,7 @@ SET total_death_num =
 SELECT * 
 FROM coviddeaths1_csv;
 
--- Ranking of selected countries from each continent with the most deaths at the end of 2020, and end of April 2021
+-- Ranking of Countries from each Continent with the most deaths at the end of 2020, and end of April 2021
 
 SELECT continent, location, population, total_cases, `date`, total_death_num, (total_death_num/ total_cases)*100 as percent_of_deaths, human_development_index
 FROM coviddeaths1_csv
@@ -64,6 +64,8 @@ WHERE rc4.ranking <=5 AND rc2.ranking <=5;
 
 
 -- looking at data
+
+-- Percentage of deaths in European Countries at the end of 2020
 SELECT continent, location, population,population_density, (total_death_num/ total_cases)*100 as percent_of_deaths, 
 cardiovasc_death_rate, diabetes_prevalence,median_age, life_expectancy, human_development_index
 FROM coviddeaths1_csv
@@ -72,27 +74,21 @@ AND TRIM(human_development_index) != ''
 AND continent ='Europe'
 ORDER BY percent_of_deaths DESC;
 
-SELECT continent, location, population,population_density, (total_death_num/ total_cases)*100 as percent_of_deaths, 
-cardiovasc_death_rate, diabetes_prevalence,median_age, life_expectancy, human_development_index
-FROM coviddeaths1_csv
-WHERE `date` = '2020-12-31'
-AND TRIM(human_development_index) != ''
-AND continent ='Europe'
-ORDER BY percent_of_deaths DESC;
-
+-- MAX Percentage of deaths in Country
 SELECT continent, location, MAX(total_cases), MAX(total_death_num)/MAX(total_cases)*100 as percent_of_deaths
 FROM coviddeaths1_csv
 WHERE continent !='' 
 GROUP BY continent, location
 ORDER BY  percent_of_deaths DESC;
 
+-- MAX deaths by Location
 SELECT location, MAX(total_death_num)
 FROM coviddeaths1_csv
 GROUP BY location
 ORDER BY MAX(total_death_num) desc
 ;
 
--- Number of cases each day
+-- Number of cases each day on the World
 
 SELECT `date`, SUM(total_cases) 
 FROM coviddeaths1_csv
