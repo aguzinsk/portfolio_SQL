@@ -177,7 +177,7 @@ AND EXISTS (SELECT 1
             WHERE t1.company = t2.company
             AND t1.location = t2.location
             AND t2.industry IS NOT NULL
-            AND t2.industry != '' -- Added if empty strings also mean "none"
+            AND t2.industry != '' -- Added when empty strings also mean "none"
            );
            
 UPDATE layoffs_staging2 t1
